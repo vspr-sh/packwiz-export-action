@@ -93,8 +93,8 @@ runs:
     - if: ${{ inputs.autoupdate == 'true' }}
       uses: actions/checkout@v4
       with:
-        repository: 'vspr-sh/packwiz-export-action'
-        path: /tmp/packwiz-export-action
+        repository: vspr-sh/packwiz-export-action
+        path: packwiz-export-action
 
     - if: ${{ inputs.autoupdate == 'true' }}
       shell: bash
