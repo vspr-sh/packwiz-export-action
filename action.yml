@@ -106,9 +106,10 @@ runs:
           exit 1
         fi
         
-        wget --output-document=/tmp/work/minecraft/bootstrap.jar "$BOOTSTRAP_URL"
+        mkdir -p work/minecraft
+        cd work
 
-        mkdir -p work/minecraft && cd work
+        wget --output-document=/minecraft/bootstrap.jar "$BOOTSTRAP_URL"
 
         cat > mcc-pack.json <<EOF
         {
