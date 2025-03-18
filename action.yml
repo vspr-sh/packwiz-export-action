@@ -111,6 +111,8 @@ runs:
 
         wget --output-document=minecraft/bootstrap.jar "$BOOTSTRAP_URL"
 
+        touch .packignore
+
         cat > mmc-pack.json <<EOF
         {
           "components": [
@@ -135,11 +137,9 @@ runs:
         name=$NAME
         InstanceType=OneSix
         PreLaunchCommand=\"\$INST_JAVA\" -jar bootstrap.jar $UPDATE_URL
-        PostExitCommand=
-        WrapperCommand=
         EOF
 
-        zip ../export/autoupdate.zip instance.cfg mmc-pack.json -r minecraft/* 
+        zip ../export/autoupdate.zip .packignore mmc-pack.json instance.cfg -r minecraft/* 
 
     - uses: actions/upload-artifact@v4
       with:
