@@ -105,14 +105,16 @@ runs:
           echo "Error: Either 'autoupdate-url' or 'autoupdate-use-github-pages' must be set."
           exit 1
         fi
-
-        mkdir -p /tmp/work/minecraft/
+        
         wget --output-document=/tmp/work/minecraft/bootstrap.jar "$BOOTSTRAP_URL"
 
-        cat > /tmp/work/mcc-pack.json <<EOF
+        mkdir -p work/minecraft && cd work
+
+        cat > mcc-pack.json <<EOF
         {
           "components": [
             {
+              "important": true,
               "uid": "net.minecraft",
               "version": "$MC_VERSION"
             },
@@ -125,7 +127,7 @@ runs:
         }
         EOF
 
-        cat > /tmp/work/instance.cfg <<EOF
+        cat > instance.cfg <<EOF
         [General]
         ConfigVersion=1.2
         iconKey=default
@@ -136,16 +138,10 @@ runs:
         WrapperCommand=
         EOF
 
-        zip -r export/autoupdate.zip /tmp/work/* -x "/tmp/work"
+        zip ../export/autoupdate.zip instance.cfg mmc-pack.json -r minecraft/* 
 
     - uses: actions/upload-artifact@v4
       with:
         name: workdir
         path: .
-        compression-level: 0 # don't compress
-
-    - uses: actions/upload-artifact@v4
-      with:
-        name: tmpworkdir
-        path: /tmp/work/*
         compression-level: 0 # don't compress
