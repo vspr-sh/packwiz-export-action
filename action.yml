@@ -50,9 +50,11 @@ runs:
       run: |
         PACK_NAME=$(tomlq -r '.name' pack.toml)
         PACK_VERSION=$(tomlq -r '.version' pack.toml)
+        MC_VERSION=$(tomlq -r '.versions.minecraft' pack.toml)
 
         echo "pack_name=$PACK_NAME" >> "$GITHUB_OUTPUT"
         echo "pack_version=$PACK_VERSION" >> "$GITHUB_OUTPUT"
+        echo "pack_minecraft_version=$MC_VERSION" >> "$GITHUB_OUTPUT"
 
         if tomlq -r '.versions.fabric' pack.toml; then
           echo "pack_loader_uid=net.fabricmc.fabric-loader" >> "$GITHUB_OUTPUT"
@@ -60,6 +62,12 @@ runs:
         elif tomlq -r '.versions.forge' pack.toml; then
           echo "pack_loader_uid=net.minecraftforge" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.forge' pack.toml)" >> "$GITHUB_OUTPUT"
+        elif tomlq -r '.versions.neoforge' pack.toml; then
+          echo "pack_loader_uid=net.neoforged" >> "$GITHUB_OUTPUT"
+          echo "pack_loader_version=$(tomlq -r '.versions.neoforged' pack.toml)" >> "$GITHUB_OUTPUT"
+        elif tomlq -r '.versions.quilt' pack.toml; then
+          echo "pack_loader_uid=org.quiltmc.quilt-loader" >> "$GITHUB_OUTPUT"
+          echo "pack_loader_version=$(tomlq -r '.versions.quilt' pack.toml)" >> "$GITHUB_OUTPUT"
         fi
 
     - run: mkdir -pv export
@@ -85,18 +93,47 @@ runs:
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
-        PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
-        PACK_VERSION: ${{ steps.metadata.outputs.pack_version }}
+        NAME: ${{ steps.metadata.outputs.pack_name }}
+        VERSION: ${{ steps.metadata.outputs.pack_version }}
+        MC_VERSION: ${{ steps.metadata.outputs.pack_minecraft_version }}
+        LOADER_UID: ${{ steps.metadata.outputs.pack_loader_uid }}
+        LOADER_VERSION: ${{ steps.metadata.outputs.pack_loader_version }}
       run: |
         if [[ -z "${{ inputs.autoupdate-url }}" && "${{ inputs.autoupdate-use-github-pages }}" != 'true' ]]; then
           echo "Error: Either 'autoupdate-url' or 'autoupdate-use-github-pages' must be set."
           exit 1
         fi
 
-        wget --output-document=export/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
+        mkdir -p /tmp/work
+        wget --output-document=/tmp/work/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
+        
+        jq -n \
+          --arg mc_version '$MC_VERSION' \
+          --arg loader_uid '$LOADER_UID' \
+          --arg loader_version '$LOADER_VERSIOn' "
+          {}
+          | .contributors = []
+          | .contributors += {uid: 'net.minecraft', version: $mc_version}
+          | .contributors += {uid: $loader_uid, version: $loader_version}
+          | .formatVersion = 1
+        " > /tmp/work/mcc-pack.json
+
+        cat > /tmp/work/instance.cfg <<EOF
+        [General]
+        ConfigVersion=1.2
+        iconKey=default
+        name=$NAME
+        InstanceType=OneSiz
+        EOF
 
     - uses: actions/upload-artifact@v4
       with:
         name: workdir
         path: .
+        compression-level: 0 # don't compress
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: tmpworkdir
+        path: /tmp/work/*
         compression-level: 0 # don't compress
