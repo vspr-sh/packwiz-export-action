@@ -106,40 +106,13 @@ runs:
           exit 1
         fi
         
-        mkdir -p work/minecraft/
-        cd work
-
+        mkdir -p work/minecraft/ && cd work
+        touch .packignore
+        envsubst < .github/actions/packwiz-export-action/instance.cfg > instance.cfg
+        envsubst < .github/actions/packwiz-export-action/mmc-pack.json > mmc-pack.json
         wget --output-document=minecraft/bootstrap.jar "$BOOTSTRAP_URL"
 
-        touch .packignore
-
-        cat > mmc-pack.json <<EOF
-        {
-          "components": [
-            {
-              "important": true,
-              "uid": "net.minecraft",
-              "version": "$MC_VERSION"
-            },
-            {
-              "uid": "$LOADER_UID",
-              "version": "$LOADER_VERSION"
-            }
-          ],
-          "formatVersion": 1
-        }
-        EOF
-
-        cat > instance.cfg <<EOF
-        [General]
-        ConfigVersion=1.2
-        iconKey=default
-        name=$NAME
-        InstanceType=OneSix
-        PreLaunchCommand=\"\$INST_JAVA\" -jar bootstrap.jar $UPDATE_URL
-        EOF
-
-        zip ../export/autoupdate.zip .packignore mmc-pack.json instance.cfg -r minecraft/* 
+        zip ../export/autoupdate.zip .packignore mmc-pack.json instance.cfg minecraft/bootstrap.jar
 
     - uses: actions/upload-artifact@v4
       with:
