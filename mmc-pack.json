@@ -3,11 +3,11 @@
         {
             "important": true,
             "uid": "net.minecraft",
-            "version": "%MC_VERSION%"
+            "version": "$MC_VERSION"
         },
         {
-            "uid": "%LOADER_UID%",
-            "version": "%LOADER_VERSION%"
+            "uid": "$LOADER_UID",
+            "version": "$LOADER_VERSION"
         }
     ],
     "formatVersion": 1
