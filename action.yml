@@ -48,7 +48,7 @@ runs:
     - id: metadata
       shell: bash
       run: |
-        PACK_NAME=$(tomlq -r '.name')
+        PACK_NAME=$(tomlq -r '.name' pack.toml)
         PACK_VERSION=$(tomlq -r '.version' pack.toml)
 
         echo "pack_name=$PACK_NAME" >> "$GITHUB_OUTPUT"
