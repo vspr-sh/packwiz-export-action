@@ -65,7 +65,7 @@ runs:
     - run: mkdir -pv exports
       shell: bash
 
-    - if: ${{ inputs.modrinth == true }}
+    - if: ${{ inputs.modrinth == 'true' }}
       shell: bash
       run: packwiz modrinth export --output=export/${PACK_NAME}-Modrinth-${PACK_VERSION}.zip
       env:
@@ -73,7 +73,7 @@ runs:
         PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
 
 
-    - if: ${{ inputs.curseforge == true }}
+    - if: ${{ inputs.curseforge == 'true' }}
       shell: bash
       run: packwiz curseforge export --output=export/${PACK_NAME}-CurseForge-${PACK_VERSION}.zip
       env:
@@ -81,7 +81,7 @@ runs:
         PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
 
 
-    - if: ${{ inputs.autoupdate == true }}
+    - if: ${{ inputs.autoupdate == 'true' }}
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
