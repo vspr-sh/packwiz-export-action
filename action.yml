@@ -1,0 +1,101 @@
+name: packwiz export
+description: Automates the export of a packwiz-based modpack for supported platforms and launchers.
+
+inputs:
+
+  modrinth:
+    description: Export the modpack as a `.mrpack` file for Modrinth.
+    required: false
+    default: true
+
+  curseforge: 
+    description: Export the modpack as a `.zip` file for CurseForge.
+    required: false
+    default: true
+
+  autoupdate:
+    description: Generate an automatically updating instance for MultiMC and/or Prism Launcher.
+    required: false
+    default: true
+
+  autoupdate-url:
+    description: Specify a custom URL for the packwiz bootstrapper.
+    required: false
+    default: 'https://thisdomaindoesnotexist.com'
+
+  autoupdate-use-github-pages:
+    description: Host packwiz metadata files on GitHub Pages.
+    required: false
+    default: false
+
+  autoupdate-bootstrap-url:
+    description: Where to download the bootstrap jar from, useful if you want to use a custom bootstrap jar.
+    required: false
+    default: 'https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar'
+
+  github_token:
+    description: GITHUB_TOKEN
+    default: "${{ github.token }}"
+
+runs:
+  using: composite
+  steps:
+    - uses: vspr-sh/packwiz-setup-action@master
+
+    - shell: bash
+      run: sudo apt-get install -yqq yq jq zip wget
+
+    - id: metadata
+      run: |
+        PACK_NAME=$(tomlq -r '.name')
+        PACK_VERSION=$(tomlq -r '.version' pack.toml)
+
+        echo "pack_name=$PACK_NAME" >> "$GITHUB_OUTPUT"
+        echo "pack_version=$PACK_VERSION" >> "$GITHUB_OUTPUT"
+
+        if tomlq -r '.versions.fabric' pack.toml; then
+          echo "pack_loader_uid=net.fabricmc.fabric-loader" >> "$GITHUB_OUTPUT"
+          echo "pack_loader_version=$(tomlq -r '.versions.fabric' pack.toml)" >> "$GITHUB_OUTPUT"
+        elif tomlq -r '.versions.forge' pack.toml; then
+          echo "pack_loader_uid=net.minecraftforge" >> "$GITHUB_OUTPUT"
+          echo "pack_loader_version=$(tomlq -r '.versions.forge' pack.toml)" >> "$GITHUB_OUTPUT"
+        fi
+
+    - run: mkdir -pv exports
+      shell: bash
+
+    - if: ${{ inputs.modrinth == true }}
+      shell: bash
+      run: packwiz modrinth export --output=export/${PACK_NAME}-Modrinth-${PACK_VERSION}.zip
+      env:
+        PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
+        PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
+
+
+    - if: ${{ inputs.curseforge == true }}
+      shell: bash
+      run: packwiz curseforge export --output=export/${PACK_NAME}-CurseForge-${PACK_VERSION}.zip
+      env:
+        PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
+        PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
+
+
+    - if: ${{ inputs.autoupdate == true }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
+        PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
+      run: |
+        if [[ -z "${{ inputs.autoupdate-url }}" && "${{ inputs.autoupdate-use-github-pages }}" != 'true' ]]; then
+          echo "Error: Either 'autoupdate-url' or 'autoupdate-use-github-pages' must be set."
+          exit 1
+        fi
+
+        wget --output-document=export/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: workdir
+        path: .
+        compression-level: 0 # don't compress
