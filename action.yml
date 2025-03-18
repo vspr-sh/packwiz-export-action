@@ -119,7 +119,7 @@ runs:
               "version": "$LOADER_VERSION"
             }
           ],
-          formatVersion: 1
+          "formatVersion": 1
         }
         EOF
 
@@ -129,7 +129,7 @@ runs:
         iconKey=default
         name=$NAME
         InstanceType=OneSix
-        PreLaunchCommand=\"$INST_JAVA\" -jar bootstrap.jar ${{ inputs.autoupdate-url }}
+        PreLaunchCommand=\"\$INST_JAVA\" -jar bootstrap.jar ${{ inputs.autoupdate-url }}
         EOF
 
         zip -r export/autoupdate.zip /tmp/work/*
