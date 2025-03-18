@@ -115,8 +115,8 @@ runs:
         
         mkdir -p work/minecraft/ && cd work
         touch .packignore
-        envsubst < /tmp/packwiz-export-action/instance.cfg > instance.cfg
-        envsubst < /tmp/packwiz-export-action/mmc-pack.json > mmc-pack.json
+        envsubst < ../packwiz-export-action/instance.cfg > instance.cfg
+        envsubst < ../packwiz-export-action/mmc-pack.json > mmc-pack.json
         wget --output-document=minecraft/bootstrap.jar "$BOOTSTRAP_URL"
 
         zip ../export/autoupdate.zip .packignore mmc-pack.json instance.cfg minecraft/bootstrap.jar
