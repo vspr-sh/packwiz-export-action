@@ -108,15 +108,15 @@ runs:
         wget --output-document=/tmp/work/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
         
         jq -n \
-          --arg mc_version '$MC_VERSION' \
-          --arg loader_uid '$LOADER_UID' \
-          --arg loader_version '$LOADER_VERSIOn' "
+          --arg mc_version "$MC_VERSION" \
+          --arg loader_uid "$LOADER_UID" \
+          --arg loader_version "$LOADER_VERSION" '
           {}
           | .contributors = []
           | .contributors += {uid: 'net.minecraft', version: $mc_version}
           | .contributors += {uid: $loader_uid, version: $loader_version}
           | .formatVersion = 1
-        " > /tmp/work/mcc-pack.json
+        ' > /tmp/work/mcc-pack.json
 
         cat > /tmp/work/instance.cfg <<EOF
         [General]
