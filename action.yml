@@ -105,7 +105,7 @@ runs:
         fi
 
         mkdir -p /tmp/work/minecraft/
-        wget --output-document=/tmp/work/.minecraft/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
+        wget --output-document=/tmp/work/minecraft/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
 
         cat > /tmp/work/mcc-pack.json <<EOF
         {
