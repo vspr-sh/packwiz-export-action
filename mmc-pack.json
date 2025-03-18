@@ -3,11 +3,11 @@
         {
             "important": true,
             "uid": "net.minecraft",
-            "version": "$MC_VERSION"
+            "version": "$INSTANCE_PACK_GAME_VERSION"
         },
         {
-            "uid": "$LOADER_UID",
-            "version": "$LOADER_VERSION"
+            "uid": "$INSTANCE_PACK_LOADER_UID",
+            "version": "$INSTANCE_PACK_LOADER_VERSION"
         }
     ],
     "formatVersion": 1

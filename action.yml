@@ -23,19 +23,23 @@ inputs:
     required: false
     default: 'https://thisdomaindoesnotexist.com'
 
-  autoupdate-use-github-pages:
-    description: Host packwiz metadata files on GitHub Pages.
-    required: false
-    default: false
-
   autoupdate-bootstrap-url:
     description: Where to download the bootstrap jar from, useful if you want to use a custom bootstrap jar.
     required: false
     default: 'https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar'
 
-  github_token:
-    description: GITHUB_TOKEN
-    default: "${{ github.token }}"
+  # autoupdate-use-github-pages:
+  #   description: Host packwiz metadata files on GitHub Pages.
+  #   required: false
+  #   default: false
+
+  # github_token:
+  #   description: GITHUB_TOKEN
+  #   default: "${{ github.token }}"
+
+outputs:
+  file-list:
+    description: A list of path's to the generated files.
 
 runs:
   using: composite
@@ -99,14 +103,13 @@ runs:
     - if: ${{ inputs.autoupdate == 'true' }}
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-        NAME: ${{ steps.metadata.outputs.pack_name }}
-        VERSION: ${{ steps.metadata.outputs.pack_version }}
-        UPDATE_URL: ${{ inputs.autoupdate-url }}
-        BOOTSTRAP_URL: ${{ inputs.autoupdate-bootstrap-url }}
-        MC_VERSION: ${{ steps.metadata.outputs.pack_minecraft_version }}
-        LOADER_UID: ${{ steps.metadata.outputs.pack_loader_uid }}
-        LOADER_VERSION: ${{ steps.metadata.outputs.pack_loader_version }}
+        INSTANCE_PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
+        INSTANCE_PACK_VERSION: ${{ steps.metadata.outputs.pack_version }}
+        INSTANCE_PACK_GAME_VERSION: ${{ steps.metadata.outputs.pack_minecraft_version }}
+        INSTANCE_PACK_LOADER_UID: ${{ steps.metadata.outputs.pack_loader_uid }}
+        INSTANCE_PACK_LOADER_VERSION: ${{ steps.metadata.outputs.pack_loader_version }}
+        INSTANCE_BOOTSTRAP_UPDATE_URL: ${{ inputs.autoupdate-url }}
+        INSTANCE_BOOTSTRAP_DOWNLOAD_URL: ${{ inputs.autoupdate-bootstrap-url }}
       run: |
         if [[ -z "${{ inputs.autoupdate-url }}" && "${{ inputs.autoupdate-use-github-pages }}" != 'true' ]]; then
           echo "Error: Either 'autoupdate-url' or 'autoupdate-use-github-pages' must be set."
@@ -118,12 +121,11 @@ runs:
         INST_JAVA='$INST_JAVA' # envsubst moment
         envsubst < ../packwiz-export-action/instance.cfg > instance.cfg
         envsubst < ../packwiz-export-action/mmc-pack.json > mmc-pack.json
-        wget --output-document=minecraft/bootstrap.jar "$BOOTSTRAP_URL"
+        wget --output-document=minecraft/bootstrap.jar "$INSTANCE_BOOTSTRAP_DOWNLOAD_URL"
 
-        zip ../export/autoupdate.zip .packignore mmc-pack.json instance.cfg minecraft/bootstrap.jar
+        zip ../export/${INSTANCE_PACK_NAME}.zip .packignore mmc-pack.json instance.cfg minecraft/bootstrap.jar
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: workdir
-        path: .
-        compression-level: 0 # don't compress
+        cd ..
+        FILE_LIST=$(find export/ -type f)
+        echo "file_list=$FILE_LIST" >> "$GITHUB_OUTPUT"
+        echo "Generated files: $FILE_LIST"
