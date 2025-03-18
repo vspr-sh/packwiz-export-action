@@ -62,7 +62,7 @@ runs:
           echo "pack_loader_version=$(tomlq -r '.versions.forge' pack.toml)" >> "$GITHUB_OUTPUT"
         fi
 
-    - run: mkdir -pv exports
+    - run: mkdir -pv export
       shell: bash
 
     - if: ${{ inputs.modrinth == 'true' }}
