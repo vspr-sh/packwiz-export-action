@@ -41,7 +41,7 @@ runs:
   using: composite
   steps:
     - uses: vspr-sh/packwiz-setup-action@master
-
+        
     - shell: bash
       run: sudo apt-get install -yqq yq zip wget
 
@@ -88,6 +88,13 @@ runs:
         PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
         PACK_VERSION: ${{ steps.metadata.outputs.pack_version }}
 
+    # we need this to be able to obtain the template files
+    # TODO: Find a better way to deal with this
+    - if: ${{ inputs.autoupdate == 'true' }}
+      uses: actions/checkout@v4
+      with:
+        repository: 'vspr-sh/packwiz-export-action'
+        path: /tmp/packwiz-export-action
 
     - if: ${{ inputs.autoupdate == 'true' }}
       shell: bash
@@ -108,8 +115,8 @@ runs:
         
         mkdir -p work/minecraft/ && cd work
         touch .packignore
-        envsubst < .github/actions/packwiz-export-action/instance.cfg > instance.cfg
-        envsubst < .github/actions/packwiz-export-action/mmc-pack.json > mmc-pack.json
+        envsubst < /tmp/packwiz-export-action/instance.cfg > instance.cfg
+        envsubst < /tmp/packwiz-export-action/mmc-pack.json > mmc-pack.json
         wget --output-document=minecraft/bootstrap.jar "$BOOTSTRAP_URL"
 
         zip ../export/autoupdate.zip .packignore mmc-pack.json instance.cfg minecraft/bootstrap.jar
