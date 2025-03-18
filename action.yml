@@ -95,6 +95,8 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         NAME: ${{ steps.metadata.outputs.pack_name }}
         VERSION: ${{ steps.metadata.outputs.pack_version }}
+        UPDATE_URL: ${{ inputs.autoupdate-url }}
+        BOOTSTRAP_URL: ${{ inputs.autoupdate-bootstrap-url }}
         MC_VERSION: ${{ steps.metadata.outputs.pack_minecraft_version }}
         LOADER_UID: ${{ steps.metadata.outputs.pack_loader_uid }}
         LOADER_VERSION: ${{ steps.metadata.outputs.pack_loader_version }}
@@ -105,7 +107,7 @@ runs:
         fi
 
         mkdir -p /tmp/work/minecraft/
-        wget --output-document=/tmp/work/minecraft/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
+        wget --output-document=/tmp/work/minecraft/bootstrap.jar "$BOOTSTRAP_URL"
 
         cat > /tmp/work/mcc-pack.json <<EOF
         {
@@ -129,7 +131,9 @@ runs:
         iconKey=default
         name=$NAME
         InstanceType=OneSix
-        PreLaunchCommand=\"\$INST_JAVA\" -jar bootstrap.jar ${{ inputs.autoupdate-url }}
+        PreLaunchCommand=\"\$INST_JAVA\" -jar bootstrap.jar $UPDATE_URL
+        PostExitCommand=
+        WrapperCommand=
         EOF
 
         zip -r export/autoupdate.zip /tmp/work/*
