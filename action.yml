@@ -46,6 +46,7 @@ runs:
       run: sudo apt-get install -yqq yq jq zip wget
 
     - id: metadata
+      shell: bash
       run: |
         PACK_NAME=$(tomlq -r '.name')
         PACK_VERSION=$(tomlq -r '.version' pack.toml)
