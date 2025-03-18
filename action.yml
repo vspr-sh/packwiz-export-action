@@ -70,7 +70,7 @@ runs:
       run: packwiz modrinth export --output=export/${PACK_NAME}-Modrinth-${PACK_VERSION}.zip
       env:
         PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
-        PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
+        PACK_VERSION: ${{ steps.metadata.outputs.pack_version }}
 
 
     - if: ${{ inputs.curseforge == 'true' }}
@@ -78,7 +78,7 @@ runs:
       run: packwiz curseforge export --output=export/${PACK_NAME}-CurseForge-${PACK_VERSION}.zip
       env:
         PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
-        PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
+        PACK_VERSION: ${{ steps.metadata.outputs.pack_version }}
 
 
     - if: ${{ inputs.autoupdate == 'true' }}
@@ -86,7 +86,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
-        PACK_VERSION: ${{ steps.metadata.outputs.pack.version }}
+        PACK_VERSION: ${{ steps.metadata.outputs.pack_version }}
       run: |
         if [[ -z "${{ inputs.autoupdate-url }}" && "${{ inputs.autoupdate-use-github-pages }}" != 'true' ]]; then
           echo "Error: Either 'autoupdate-url' or 'autoupdate-use-github-pages' must be set."
