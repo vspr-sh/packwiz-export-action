@@ -136,7 +136,7 @@ runs:
         WrapperCommand=
         EOF
 
-        zip -r export/autoupdate.zip /tmp/work/*
+        zip -r export/autoupdate.zip /tmp/work/* -x "/tmp/work"
 
     - uses: actions/upload-artifact@v4
       with:
