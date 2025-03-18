@@ -43,7 +43,7 @@ runs:
     - uses: vspr-sh/packwiz-setup-action@master
 
     - shell: bash
-      run: sudo apt-get install -yqq yq jq zip wget
+      run: sudo apt-get install -yqq yq zip wget
 
     - id: metadata
       shell: bash
@@ -104,27 +104,35 @@ runs:
           exit 1
         fi
 
-        mkdir -p /tmp/work
-        wget --output-document=/tmp/work/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
-        
-        jq -n \
-          --arg mc_version "$MC_VERSION" \
-          --arg loader_uid "$LOADER_UID" \
-          --arg loader_version "$LOADER_VERSION" '
-          {}
-          | .contributors = []
-          | .contributors += {uid: "net.minecraft", version: $mc_version}
-          | .contributors += {uid: $loader_uid, version: $loader_version}
-          | .formatVersion = 1
-        ' > /tmp/work/mcc-pack.json
+        mkdir -p /tmp/work/minecraft/
+        wget --output-document=/tmp/work/.minecraft/bootstrap.jar '${{ inputs.autoupdate-bootstrap-url }}'
+
+        cat > /tmp/work/mcc-pack.json <<EOF
+        {
+          "components": [
+            {
+              "uid": "net.minecraft",
+              "version": "$MC_VERSION"
+            },
+            {
+              "uid": "$LOADER_UID",
+              "version": "$LOADER_VERSION"
+            }
+          ],
+          formatVersion: 1
+        }
+        EOF
 
         cat > /tmp/work/instance.cfg <<EOF
         [General]
         ConfigVersion=1.2
         iconKey=default
         name=$NAME
-        InstanceType=OneSiz
+        InstanceType=OneSix
+        PreLaunchCommand=\"$INST_JAVA\" -jar bootstrap.jar ${{ inputs.autoupdate-url }}
         EOF
+
+        zip -r export/autoupdate.zip /tmp/work/*
 
     - uses: actions/upload-artifact@v4
       with:
