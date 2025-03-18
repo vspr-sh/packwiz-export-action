@@ -113,7 +113,7 @@ runs:
           --arg loader_version "$LOADER_VERSION" '
           {}
           | .contributors = []
-          | .contributors += {uid: 'net.minecraft', version: $mc_version}
+          | .contributors += {uid: "net.minecraft", version: $mc_version}
           | .contributors += {uid: $loader_uid, version: $loader_version}
           | .formatVersion = 1
         ' > /tmp/work/mcc-pack.json
