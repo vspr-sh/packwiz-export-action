@@ -132,4 +132,3 @@ runs:
         cd ..
         FILE_LIST=$(find export/ -type f)
         echo "file_list=$FILE_LIST" >> "$GITHUB_OUTPUT"
-        echo "Generated files: $FILE_LIST"
