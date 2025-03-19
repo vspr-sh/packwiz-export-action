@@ -18,7 +18,7 @@ inputs:
     required: false
     default: ''
 
-  autoupdate-bootstrap-url:
+  autoupdate_bootstrap_url:
     description: Where to download the bootstrap jar from, useful if you want to use a custom bootstrap jar.
     required: false
     default: 'https://github.com/packwiz/packwiz-installer-bootstrap/releases/latest/download/packwiz-installer-bootstrap.jar'
@@ -33,8 +33,18 @@ inputs:
   #   default: "${{ github.token }}"
 
 outputs:
-  file-list:
+  file_list:
     description: A list of path's to the generated files.
+  pack_name: 
+    description: Get the pack's name
+  pack_version:
+    description: Get the pack version
+  pack_game_version: 
+    description: Get the pack's name
+  pack_loader:
+    description: Get the type of loader used
+  pack_loader_version:
+    description: Get the version of the loader used
 
 runs:
   using: composite
@@ -56,15 +66,19 @@ runs:
         echo "pack_minecraft_version=$MC_VERSION" >> "$GITHUB_OUTPUT"
 
         if tomlq -r '.versions.fabric' pack.toml; then
+          echo "pack_loader=fabric"
           echo "pack_loader_uid=net.fabricmc.fabric-loader" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.fabric' pack.toml)" >> "$GITHUB_OUTPUT"
         elif tomlq -r '.versions.forge' pack.toml; then
+          echo "pack_loader=forge"
           echo "pack_loader_uid=net.minecraftforge" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.forge' pack.toml)" >> "$GITHUB_OUTPUT"
         elif tomlq -r '.versions.neoforge' pack.toml; then
+          echo "pack_loader=neoforge"
           echo "pack_loader_uid=net.neoforged" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.neoforged' pack.toml)" >> "$GITHUB_OUTPUT"
         elif tomlq -r '.versions.quilt' pack.toml; then
+          echo "pack_loader=quilt"
           echo "pack_loader_uid=org.quiltmc.quilt-loader" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.quilt' pack.toml)" >> "$GITHUB_OUTPUT"
         fi
@@ -104,13 +118,8 @@ runs:
         INSTANCE_PACK_LOADER_UID: ${{ steps.metadata.outputs.pack_loader_uid }}
         INSTANCE_PACK_LOADER_VERSION: ${{ steps.metadata.outputs.pack_loader_version }}
         INSTANCE_BOOTSTRAP_UPDATE_URL: ${{ inputs.autoupdate }}
-        INSTANCE_BOOTSTRAP_DOWNLOAD_URL: ${{ inputs.autoupdate-bootstrap-url }}
+        INSTANCE_BOOTSTRAP_DOWNLOAD_URL: ${{ inputs.autoupdate_bootstrap_url }}
       run: |
-        if [[ -z "${{ inputs.autoupdate-url }}" && "${{ inputs.autoupdate-use-github-pages }}" != 'true' ]]; then
-          echo "Error: Either 'autoupdate-url' or 'autoupdate-use-github-pages' must be set."
-          exit 1
-        fi
-        
         mkdir -p work/minecraft/ && cd work
         touch .packignore
         INST_JAVA='$INST_JAVA' # envsubst moment
