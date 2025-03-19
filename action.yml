@@ -57,28 +57,24 @@ runs:
     - id: metadata
       shell: bash
       run: |
-        PACK_NAME=$(tomlq -r '.name' pack.toml)
-        PACK_VERSION=$(tomlq -r '.version' pack.toml)
-        MC_VERSION=$(tomlq -r '.versions.minecraft' pack.toml)
-
-        echo "pack_name=$PACK_NAME" >> "$GITHUB_OUTPUT"
-        echo "pack_version=$PACK_VERSION" >> "$GITHUB_OUTPUT"
-        echo "pack_minecraft_version=$MC_VERSION" >> "$GITHUB_OUTPUT"
+        echo "pack_name=$(tomlq -r '.name' pack.toml)" >> "$GITHUB_OUTPUT"
+        echo "pack_version=$(tomlq -r '.version' pack.toml)" >> "$GITHUB_OUTPUT"
+        echo "pack_game_version=$(tomlq -r '.versions.minecraft' pack.toml)" >> "$GITHUB_OUTPUT"
 
         if tomlq -r '.versions.fabric' pack.toml; then
           echo "pack_loader=fabric"
           echo "pack_loader_uid=net.fabricmc.fabric-loader" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.fabric' pack.toml)" >> "$GITHUB_OUTPUT"
         elif tomlq -r '.versions.forge' pack.toml; then
-          echo "pack_loader=forge"
+          echo "pack_loader=forge" >> "$GITHUB_OUTPUT"
           echo "pack_loader_uid=net.minecraftforge" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.forge' pack.toml)" >> "$GITHUB_OUTPUT"
         elif tomlq -r '.versions.neoforge' pack.toml; then
-          echo "pack_loader=neoforge"
+          echo "pack_loader=neoforge" >> "$GITHUB_OUTPUT"
           echo "pack_loader_uid=net.neoforged" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.neoforged' pack.toml)" >> "$GITHUB_OUTPUT"
         elif tomlq -r '.versions.quilt' pack.toml; then
-          echo "pack_loader=quilt"
+          echo "pack_loader=quilt" >> "$GITHUB_OUTPUT"
           echo "pack_loader_uid=org.quiltmc.quilt-loader" >> "$GITHUB_OUTPUT"
           echo "pack_loader_version=$(tomlq -r '.versions.quilt' pack.toml)" >> "$GITHUB_OUTPUT"
         fi
@@ -114,7 +110,7 @@ runs:
       env:
         INSTANCE_PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
         INSTANCE_PACK_VERSION: ${{ steps.metadata.outputs.pack_version }}
-        INSTANCE_PACK_GAME_VERSION: ${{ steps.metadata.outputs.pack_minecraft_version }}
+        INSTANCE_PACK_GAME_VERSION: ${{ steps.metadata.outputs.pack_game_version }}
         INSTANCE_PACK_LOADER_UID: ${{ steps.metadata.outputs.pack_loader_uid }}
         INSTANCE_PACK_LOADER_VERSION: ${{ steps.metadata.outputs.pack_loader_version }}
         INSTANCE_BOOTSTRAP_UPDATE_URL: ${{ inputs.autoupdate }}
