@@ -127,4 +127,5 @@ runs:
 
         cd ..
         FILE_LIST=$(find export/ -type f)
-        echo "file_list=$FILE_LIST" >> "$GITHUB_OUTPUT"
+        FORMATTED_LIST=$(echo "$FILE_LIST" | tr '\n' ',')
+        echo "file_list=$FORMATTED_LIST" >> "$GITHUB_OUTPUT"
