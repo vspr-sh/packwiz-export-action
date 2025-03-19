@@ -14,14 +14,9 @@ inputs:
     default: true
 
   autoupdate:
-    description: Generate an automatically updating instance for MultiMC and/or Prism Launcher.
+    description: Generate an automatically updating instance for MultiMC and/or Prism Launcher. If you want to use this, just pass a URL for the bootstrapper.
     required: false
-    default: true
-
-  autoupdate-url:
-    description: Specify a custom URL for the packwiz bootstrapper.
-    required: false
-    default: 'https://thisdomaindoesnotexist.com'
+    default: ''
 
   autoupdate-bootstrap-url:
     description: Where to download the bootstrap jar from, useful if you want to use a custom bootstrap jar.
@@ -94,13 +89,13 @@ runs:
 
     # we need this to be able to obtain the template files
     # TODO: Find a better way to deal with this
-    - if: ${{ inputs.autoupdate == 'true' }}
+    - if: ${{ inputs.autoupdate != '' }}
       uses: actions/checkout@v4
       with:
         repository: vspr-sh/packwiz-export-action
         path: packwiz-export-action
 
-    - if: ${{ inputs.autoupdate == 'true' }}
+    - if: ${{ inputs.autoupdate != '' }}
       shell: bash
       env:
         INSTANCE_PACK_NAME: ${{ steps.metadata.outputs.pack_name }}
@@ -108,7 +103,7 @@ runs:
         INSTANCE_PACK_GAME_VERSION: ${{ steps.metadata.outputs.pack_minecraft_version }}
         INSTANCE_PACK_LOADER_UID: ${{ steps.metadata.outputs.pack_loader_uid }}
         INSTANCE_PACK_LOADER_VERSION: ${{ steps.metadata.outputs.pack_loader_version }}
-        INSTANCE_BOOTSTRAP_UPDATE_URL: ${{ inputs.autoupdate-url }}
+        INSTANCE_BOOTSTRAP_UPDATE_URL: ${{ inputs.autoupdate }}
         INSTANCE_BOOTSTRAP_DOWNLOAD_URL: ${{ inputs.autoupdate-bootstrap-url }}
       run: |
         if [[ -z "${{ inputs.autoupdate-url }}" && "${{ inputs.autoupdate-use-github-pages }}" != 'true' ]]; then
